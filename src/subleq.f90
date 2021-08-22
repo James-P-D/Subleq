@@ -17,7 +17,7 @@ PROGRAM SUBLEQ
 
     CALL PARSE(token_array, code_length, code)
     
-    !CALL EXECUTE_CODE(code, code_length)
+    CALL EXECUTE_CODE(code, code_length)
     
     CONTAINS
     
@@ -91,20 +91,20 @@ PROGRAM SUBLEQ
         ! REC_PARSE()
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        SUBROUTINE REC_PARSE(token_array, code_length, code, replace_this, with_this)
+        RECURSIVE SUBROUTINE REC_PARSE(token_array, code_length, code, replace_this, with_this)
             IMPLICIT NONE
             INTEGER, DIMENSION(0:100) :: code
-            INTEGER :: code_length, n, stat, output_int, tempy
+            INTEGER :: code_length, n, stat, output_int, colon_index
             CHARACTER (LEN = 10), dimension(0:100) :: token_array
-            CHARACTER (LEN = 10) replace_this, with_this, token
+            CHARACTER (LEN = 10) replace_this, with_this, token, left, right, temp_str
             
             DO n = 0, (code_length - 1), 1
-                token = TRIM(token_array(n))
+                token = ADJUSTL(TRIM(token_array(n)))
                 WRITE (*, '(A)') token
                 
                 IF (INDEX(token, '?') == 1) THEN
                     token = token(2:)
-                    CALL STR_TO_INT(ADJUSTL(TRIM(token)), output_int, stat)
+                    CALL STR_TO_INT(token, output_int, stat)
                                         
                     IF (STAT /= 0) THEN
                         PRINT *, 'ERROR: Unable to parse'
@@ -115,10 +115,31 @@ PROGRAM SUBLEQ
                         WRITE (token_array(n), '(i10)') output_int
                         token_array(n) = ADJUSTL(TRIM(token_array(n)))
                     END IF
-                END IF
-                                
-            END DO
-            
+                ELSE IF (token == replace_this) THEN
+                    WRITE (token_array(n), '(a)') with_this
+                ELSE
+                    colon_index = INDEX(token, ':')
+                    IF (colon_index > 0) THEN                        
+                        left = ADJUSTL(TRIM(token(:colon_index - 1)))
+                        right = ADJUSTL(TRIM(token(colon_index + 1:)))
+                        
+                        WRITE (temp_str, '(i10)') n
+                        WRITE (*, '(A)') temp_str
+                            
+                        CALL STR_TO_INT(right, output_int, stat)
+                        IF (STAT == 0) THEN
+                            WRITE (token_array(n), '(a)') right
+                            CALL REC_PARSE(token_array, code_length, code, left, ADJUSTL(TRIM(temp_str)))                        
+                        ELSE IF (left == right) THEN
+                            WRITE (token_array(n), '(a)') ADJUSTL(TRIM(temp_str))
+                            CALL REC_PARSE(token_array, code_length, code, left, ADJUSTL(TRIM(temp_str)))                        
+                        ELSE
+                            WRITE (token_array(n), '(a)') right
+                            CALL REC_PARSE(token_array, code_length, code, left, ADJUSTL(TRIM(temp_str)))                        
+                        END IF
+                    END IF
+                END IF                                
+            END DO            
         END SUBROUTINE REC_PARSE
         
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -144,8 +165,8 @@ PROGRAM SUBLEQ
                 IF (STAT == 0) THEN
                     code(n) = output_int
                 ELSE
-                    !PRINT *, 'ERROR: Something fucked up'
-                    !STOP
+                    PRINT *, 'ERROR: Something fucked up'
+                    STOP
                 END IF
 
             END DO
