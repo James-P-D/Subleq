@@ -3,8 +3,6 @@ Subleq interpreter in Fortran
 
 ![Screenshot](https://github.com/James-P-D/Subleq/blob/main/screenshot.gif)
 
-![Screenshot](https://github.com/James-P-D/Forthish/blob/master/screenshot.gif)
-
 ## Introduction
 
 Subleq is a simple (One Instruction Set Computer](https://en.wikipedia.org/wiki/One-instruction_set_computer) (OISC). An OISC is a theoretical abstract machine which has only a single assembly langauge opcode (unlike, for example, x86 Asm which has `mov`, `lea`, `cmp`, `jnz`, and several other possible instructions.) The only instruciont in Subleq is SUBtract if Less-than or EQual, from which we get it's name.
