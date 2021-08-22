@@ -1,7 +1,9 @@
 # Subleq
 Subleq interpreter in Fortran
 
-![Screenshot](https://github.com/James-P-D/Subleq/blob/master/screenshot.gif)
+![Screenshot](https://github.com/James-P-D/Subleq/blob/main/screenshot.gif)
+
+![Screenshot](https://github.com/James-P-D/Forthish/blob/master/screenshot.gif)
 
 ## Introduction
 
