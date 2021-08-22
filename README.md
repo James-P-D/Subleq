@@ -64,8 +64,18 @@ To compile:
 gfortran subleq.f90 -o subleq.exe
 ```
 
-The program expects a single parameter specifying a Subleq file. To run out 'hello world' example we would use:
+The program expects a single parameter specifying a Subleq file. To run our 'hello world' example we would use:
 
 ```
 ./subleq.exe hello_world.slq
+```
+
+## Known Bugs
+
+This is my first (and probably last) attempt at using Fortran. 
+
+The program makes no attempt at detecting circular-references. The following program will cause a stack-overflow crash since it's impossible to resolve the three references:
+
+```
+a:b b:c c:a
 ```
