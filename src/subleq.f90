@@ -17,7 +17,7 @@ PROGRAM SUBLEQ
 
     CALL PARSE(token_array, code_length, code)
     
-    CALL EXECUTE_CODE(code, code_length)
+    !CALL EXECUTE_CODE(code, code_length)
     
     CONTAINS
     
@@ -31,7 +31,6 @@ PROGRAM SUBLEQ
             CHARACTER (LEN = 100) :: line_read
             CHARACTER (LEN = 100) :: token            
             INTEGER :: error, comment_index, space_index, token_index, code_length
-            !CHARACTER (LEN = 1000), dimension(0:10) :: token_array
             CHARACTER (LEN = 10), dimension(0:100) :: token_array
             
             token_index = 0
@@ -95,16 +94,29 @@ PROGRAM SUBLEQ
         SUBROUTINE REC_PARSE(token_array, code_length, code, replace_this, with_this)
             IMPLICIT NONE
             INTEGER, DIMENSION(0:100) :: code
-            INTEGER :: code_length, n, stat, output_int
+            INTEGER :: code_length, n, stat, output_int, tempy
             CHARACTER (LEN = 10), dimension(0:100) :: token_array
-            CHARACTER (LEN = 10) replace_this, with_this
+            CHARACTER (LEN = 10) replace_this, with_this, token
             
-            DO n = 0, code_length, 1
-                WRITE (*, '(A)') TRIM(token_array(n))   
-                CALL STR_TO_INT(TRIM(token_array(n)), output_int, stat)
-                IF (STAT == 0) THEN
-                    code(n) = output_int
+            DO n = 0, (code_length - 1), 1
+                token = TRIM(token_array(n))
+                WRITE (*, '(A)') token
+                
+                IF (INDEX(token, '?') == 1) THEN
+                    token = token(2:)
+                    CALL STR_TO_INT(ADJUSTL(TRIM(token)), output_int, stat)
+                                        
+                    IF (STAT /= 0) THEN
+                        PRINT *, 'ERROR: Unable to parse'
+                        WRITE (*, '(A)') token_array(n)
+                        STOP
+                    ELSE
+                        output_int = output_int + n
+                        WRITE (token_array(n), '(i10)') output_int
+                        token_array(n) = ADJUSTL(TRIM(token_array(n)))
+                    END IF
                 END IF
+                                
             END DO
             
         END SUBROUTINE REC_PARSE
@@ -116,15 +128,28 @@ PROGRAM SUBLEQ
         SUBROUTINE PARSE(token_array, code_length, code)
             IMPLICIT NONE
             INTEGER, DIMENSION(0:100) :: code
-            INTEGER :: code_length, n
+            INTEGER :: code_length, n, output_int, stat
             CHARACTER (LEN = 10), dimension(0:100) :: token_array
+            CHARACTER (LEN = 10) token
             
-            !DO n = 0, code_length, 1
-            !    WRITE (*, '(A)') TRIM(token_array(n))                
-            !END DO
-            
-            CALL REC_PARSE(token_array, code_length, code, '', '')
-            
+            CALL REC_PARSE(token_array, code_length, code, '', '')        
+
+            PRINT *, '------------------------'
+
+            DO n = 0, (code_length - 1), 1
+                token = TRIM(token_array(n))
+                WRITE (*, '(A)') token
+                
+                CALL STR_TO_INT(TRIM(token_array(n)), output_int, stat)
+                IF (STAT == 0) THEN
+                    code(n) = output_int
+                ELSE
+                    !PRINT *, 'ERROR: Something fucked up'
+                    !STOP
+                END IF
+
+            END DO
+                        
         END SUBROUTINE PARSE
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
